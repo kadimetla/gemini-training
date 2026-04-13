@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
-  "_comment": "Safety-focused configuration - restricted tools, sandbox enabled",
+  "_comment": "Safety-focused configuration - restricted tools, sandbox enabled. NOTE: tools.exclude is deprecated as of 0.30 - prefer a policy file (gemini --policy policy.toml) with deny rules. Legacy exclude still works but will be removed in a future release.",
 
   "general": {
     "preferredEditor": "vscode",

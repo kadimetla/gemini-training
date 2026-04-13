@@ -131,12 +131,15 @@ npm run dev
 - Session management and checkpointing
 - IDE integration (VS Code)
 
-### New Since December 2025
-- Agent Skills are now stable and enabled by default
-- New navigation and planning UX: `/rewind`, `/resume`, `/prompt-suggest`
-- Background shell management via `/shells`
-- Improved session browser and automatic session saving
-- More mature model routing with Gemini 3 Pro/Flash and Auto modes
+### New in Gemini CLI 0.30 – 0.37
+- Agent Skills stable and default-on; SDK + `SessionContext` (0.30)
+- Policy Engine replaces `--allowed-tools` / `tools.exclude` (0.30)
+- Gemini 3.1 Pro Preview available via `/model` (0.31)
+- Workspace model steering + parallel extension loading (0.32)
+- A2A remote agents over authenticated HTTP (0.33)
+- Plan Mode is default-on; gVisor/LXC sandboxing on Linux (0.34)
+- Multi-registry MCP/extensions, native macOS Seatbelt, Windows sandboxing, Git worktrees (0.36)
+- `Ctrl+G` replaces `Ctrl+X` for external editor; persistent policy approvals (0.37)
 
 ## Tips for Success
 
@@ -157,7 +160,7 @@ gemini -i "context"             # Interactive with initial prompt
 # Configuration
 gemini --sandbox                # Run in sandbox mode
 gemini --approval-mode yolo     # Auto-approve all actions
-gemini --model gemini-2.5-pro   # Specify model
+gemini --model gemini-3-pro     # Specify model (e.g. gemini-3-pro, gemini-2.5-pro)
 
 # Session management
 gemini --resume                 # Resume last session

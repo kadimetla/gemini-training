@@ -14,11 +14,29 @@ This document contains hands-on exercises for learning to use Gemini CLI for pro
 
 ## Prerequisites
 
-- Gemini CLI installed: `npm install -g @google/gemini-cli`
+- Gemini CLI installed: `npm install -g @google/gemini-cli` (version 0.37.x or later)
 - API key set: `export GEMINI_API_KEY="your-key"`
 - Git installed and configured
 - Development environment for Python, JavaScript, or Java
 - Docker (optional, for sandbox mode)
+
+## Heads-up: Plan Mode is the default
+
+As of Gemini CLI 0.34, `plan` is the default approval mode. When you launch
+`gemini`, it will **draft a plan before executing any tool calls**. For most
+of these labs you'll want to accept the plan (press `Shift+Tab` to cycle
+modes, or accept each step) before commands run. If a step feels "stuck,"
+check whether Gemini is waiting for plan approval.
+
+To skip plan mode entirely for a lab step:
+
+```bash
+gemini --approval-mode default       # per-tool approval
+gemini --approval-mode auto_edit     # auto-approve edits
+```
+
+Also note the keyboard shortcut change in 0.37: **`Ctrl+G`** opens the
+external editor (it used to be `Ctrl+X`).
 
 ---
 
@@ -687,8 +705,12 @@ After completing this lab:
    In `.gemini/settings.json`, configure:
    - `general.defaultApprovalMode` to `auto_edit` or `plan`
    - `tools.sandbox` enabled
-   - `tools.exclude` includes `run_shell_command`
    - `general.checkpointing.enabled` set to `true`
+
+   Then create a `policy.toml` file alongside it with a `deny` rule for
+   `run_shell_command` and launch Gemini with `gemini --policy policy.toml`.
+   (The legacy `tools.exclude` key still works but is deprecated as of
+   Gemini CLI 0.30 — the Policy Engine is the forward path.)
 
 4. **Inspect hooks and policy behavior**:
    In interactive mode, run:

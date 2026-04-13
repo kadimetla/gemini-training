@@ -97,15 +97,19 @@ Kousen IT, Inc.
 
 ---
 
-# What's New Since Dec 2025
+# What's New in 0.30 – 0.37
 
 <v-clicks>
 
-- **Agent Skills** are now stable and enabled by default
-- **New commands**: `/rewind`, `/resume`, `/prompt-suggest`, `/stats`, `/shells`
-- **Background shells** for long-running terminal workflows
-- **MCP improvements**: OAuth consent and MCP resources via `@server://...`
-- **Latest stable track**: Gemini CLI `0.29.x`
+- **Agent Skills** stable and default-on · **SDK** + `SessionContext` (0.30)
+- **Policy Engine** replaces `--allowed-tools` / `tools.exclude` (0.30)
+- **Gemini 3.1 Pro Preview** available via `/model` (0.31)
+- **Workspace model steering** + parallel extension loading (0.32)
+- **A2A remote agents** over authenticated HTTP (0.33)
+- **Plan Mode is default-on**; gVisor/LXC sandboxing on Linux (0.34)
+- **Multi-registry MCP/extensions**, macOS Seatbelt, Windows sandboxing, Git worktrees (0.36)
+- **Ctrl+G** replaces `Ctrl+X` for external editor; persistent policy approvals (0.37)
+- **Latest stable track**: Gemini CLI `0.37.x`
 
 </v-clicks>
 
@@ -116,7 +120,7 @@ Kousen IT, Inc.
 <v-clicks>
 
 - Open-source AI agent from Google
-- **Gemini 3 Pro** (latest) or Gemini 2.5 Pro/Flash
+- **Gemini 3.1 Pro Preview** (newest) · Gemini 3 Pro · Gemini 2.5 Pro/Flash
 - Built-in tools: Google Search, file ops, shell, web fetch
 - Model Context Protocol (MCP) support
 - Designed for developers who live in the terminal
@@ -143,10 +147,12 @@ Kousen IT, Inc.
 
 <v-clicks>
 
-- **Gemini 3 Pro**: Most intelligent, best for complex coding
+- **Gemini 3.1 Pro Preview**: Newest, added in Gemini CLI 0.31
+- **Gemini 3 Pro**: Most intelligent stable model, best for complex coding
 - **Gemini 2.5 Pro**: Strong performance, 1M token context
 - **Gemini 2.5 Flash**: Faster, lower cost option
-- **Auto routing**: CLI picks best model for each task
+- **Auto routing**: CLI picks the best model for each task
+- **Workspace model steering** (0.32+): pin a model per workspace
 
 </v-clicks>
 
@@ -174,7 +180,7 @@ Kousen IT, Inc.
 - **npm** (recommended): `npm install -g @google/gemini-cli`
 - **npx** (no install): `npx @google/gemini-cli`
 - Verify: `gemini --version`
-- Current version: 0.29.x
+- Current version: 0.37.x (latest stable as of April 2026)
 
 </v-clicks>
 
@@ -378,7 +384,7 @@ gemini "Analyze the architecture in @./src/"
 
 - `Ctrl+L` - Clear screen
 - `Ctrl+V` - Paste text/images
-- `Ctrl+X` - Open external editor
+- `Ctrl+G` - Open external editor (was `Ctrl+X` before 0.37)
 
 </v-clicks>
 
@@ -443,15 +449,19 @@ backgroundSize: cover
 
 <v-clicks>
 
-- **default**: Prompt for approval on tool calls
+- **plan** *(default since 0.34)*: Draft a plan, no execution until approved
+- **default**: Prompt for approval on each tool call
 - **auto_edit**: Auto-approve file edit tools only
 - **yolo**: Auto-approve ALL tool calls
 
 </v-clicks>
 
 ```bash
-# Default - asks for approval
+# New default - builds a plan first
 gemini
+
+# Jump straight to per-tool prompts
+gemini --approval-mode default
 
 # Auto-approve edits only
 gemini --approval-mode auto_edit
@@ -463,24 +473,69 @@ gemini --approval-mode yolo
 
 ---
 
+# Plan Mode
+
+<v-clicks>
+
+- **Default since Gemini CLI 0.34** — expect it when you launch
+- Drafts a structured plan before touching any file or tool
+- Open the plan in your external editor with `Ctrl+G`
+- Use `Shift+Tab` to cycle out of plan mode into `default` / `auto_edit`
+- 0.33+ adds research subagents, annotations, and a `copy` subcommand
+- Heads-up: any lesson that used to run immediately now **pauses first**
+
+</v-clicks>
+
+```bash
+# Launch straight into an execution mode instead
+gemini --approval-mode default
+```
+
+---
+
 # Sandbox Mode
 
 <v-clicks>
 
-- Isolate file operations in a container
-- Requires Docker or Podman
+- Isolate file operations away from your host
+- Multiple backends depending on your OS
 - Prevents accidental system changes
 - Perfect for exploring unfamiliar code
 
 </v-clicks>
 
 ```bash
-# Run in sandbox mode
+# Run in sandbox mode (picks the best backend for your OS)
 gemini --sandbox
 
-# Or with -s flag
+# Short form
 gemini -s "Refactor this entire codebase"
 ```
+
+---
+
+# Sandbox Backends (0.34 – 0.36)
+
+<v-clicks>
+
+- **Docker / Podman**: original cross-platform option
+- **gVisor (runsc)**: Linux, added in 0.34 — strong kernel-level isolation
+- **LXC**: Linux, experimental in 0.34
+- **macOS Seatbelt**: native in 0.36, no Docker required
+- **Windows sandboxing**: native subagent sandboxing in 0.36
+
+</v-clicks>
+
+```json
+// ~/.gemini/settings.json
+{
+  "tools": {
+    "sandbox": "docker"   // or "gvisor", "seatbelt", etc.
+  }
+}
+```
+
+📖 [geminicli.com/docs/cli/settings/](https://geminicli.com/docs/cli/settings/)
 
 ---
 
@@ -698,19 +753,29 @@ backgroundSize: cover
 <v-clicks>
 
 - **tools.allowed**: Whitelist available tools
-- **tools.exclude**: Blacklist specific tools
-- Restrict dangerous operations for safety
+- **Policy Engine** (preferred): `deny` rules for blocking tools
+- `tools.exclude` still works but is **deprecated** since 0.30
 
 </v-clicks>
 
 ```json
 {
   "tools": {
-    "allowed": ["read_file", "write_file", "glob"],
-    "exclude": ["run_shell_command"]
+    "allowed": ["read_file", "write_file", "glob"]
   }
 }
 ```
+
+Pass a policy file to block tools:
+
+```bash
+gemini --policy ./policy.toml
+```
+
+Policy files use TOML with `decision` + `priority` fields per rule.
+See the current schema at the docs link below.
+
+📖 [geminicli.com/docs/reference/policy-engine](https://geminicli.com/docs/reference/policy-engine/)
 
 ---
 
@@ -756,8 +821,9 @@ backgroundSize: cover
 
 <v-clicks>
 
-- Change from `GEMINI.md` to custom name
-- Support multiple filenames
+- Change from `GEMINI.md` to a custom name
+- **`AGENTS.md` is officially supported** — friendly to multi-agent repos
+- Support multiple filenames in priority order
 - Include additional directories
 
 </v-clicks>
@@ -765,7 +831,7 @@ backgroundSize: cover
 ```json
 {
   "context": {
-    "fileName": ["CONTEXT.md", "GEMINI.md"],
+    "fileName": ["AGENTS.md", "GEMINI.md", "CONTEXT.md"],
     "includeDirectories": ["~/shared-context"],
     "loadMemoryFromIncludeDirectories": true
   }
@@ -908,6 +974,40 @@ gemini mcp remove github
 </v-clicks>
 
 📖 **Registry**: [modelcontextprotocol.io/registry](https://modelcontextprotocol.io/registry)
+
+---
+
+# Multi-Registry Architecture (0.36+)
+
+<v-clicks>
+
+- Gemini CLI now supports **multiple extension/MCP registries** side by side
+- Mix the public MCP registry with internal/private registries
+- Useful for teams that host vetted MCP servers internally
+- Extensions load in parallel (added in 0.32)
+
+</v-clicks>
+
+```bash
+# List registries and what each provides
+gemini extensions list
+gemini mcp list
+```
+
+📖 [geminicli.com/docs/changelogs/latest/](https://geminicli.com/docs/changelogs/latest/)
+
+---
+
+# A2A Remote Agents (0.33+)
+
+<v-clicks>
+
+- Gemini CLI can call **remote agents over HTTP** via the A2A protocol
+- Authenticated agent-card discovery for private catalogs
+- Same permissioning story as MCP: allow/deny per server
+- Good fit for internal "shared agents" a team maintains centrally
+
+</v-clicks>
 
 ---
 

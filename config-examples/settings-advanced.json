@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
-  "_comment": "Advanced Gemini CLI configuration with current settings schema",
+  "_comment": "Advanced Gemini CLI configuration with current settings schema. NOTE: tools.exclude is deprecated as of 0.30 - prefer the Policy Engine (--policy policy.toml) for deny rules.",
 
   "general": {
     "preferredEditor": "vscode",
