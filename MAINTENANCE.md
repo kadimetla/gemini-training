@@ -27,48 +27,58 @@ gemini
 gemini --policy --help
 
 # 6. Regenerate the slides PDF so the handout matches the source
-npm run build                      # or: npx slidev export
+#    IMPORTANT: slides.pdf on main is NOT auto-rebuilt - if slides.md
+#    has changed since the last PDF commit, the committed PDF is stale
+#    and students will get out-of-date handouts.
+npx slidev export slides.md        # traditional headless export
+# ...or use the new in-browser exporter (Slidev 52.x):
+# npx slidev                        # then visit http://localhost:<port>/export
+git add slides.pdf
+git commit -m "docs: regenerate slides.pdf"
+git push origin main
 ```
 
 If any step surfaces a surprise, check the release notes at
 <https://geminicli.com/docs/changelogs/latest/> before class.
 
+> **Heads-up for April 2026 delivery:** `slides.md` was refreshed for
+> Gemini CLI 0.30–0.37 (commit `b60409b`), but `slides.pdf` has NOT
+> been regenerated from a sandboxed environment. Rebuild it from your
+> laptop and commit the result before class.
+
 ## Dependency vulnerabilities
 
-Dependabot routinely reports ~25+ findings on `main`. **None of them affect
+Dependabot routinely reports findings on `main`. **None of them affect
 students or the taught material.** Triage below.
 
-### Root `package-lock.json` — Slidev toolchain (~20 findings)
+### Current state (after April 2026 refresh)
 
-These are all transitive deps of `@slidev/cli`. They only affect YOUR
-laptop when rebuilding the deck — nothing ships to students.
+As of commits `0d4c9e0` and `3b4d7a1`:
 
-**Fix:**
+| Lockfile | Before | After |
+|---|---|---|
+| Root `package-lock.json` (Slidev toolchain) | 20 (1 low / 14 mod / 5 high) | **6** (all moderate) |
+| `exercises/javascript/my-task-manager` | 4 (1 mod / 3 high) | **0** |
 
-```bash
-npm audit fix
-# Optional (only if you want to bump Slidev to a new major):
-# npm audit fix --force
-```
+The remaining 6 are all in the `@slidev/cli` → `monaco-editor` →
+`dompurify` chain (moderate mutation-XSS). They only clear with
+`npm audit fix --force`, which downgrades `@slidev/cli` from 52.12.0
+to 52.6.0 (a major-version downgrade). **Don't bother** — the attack
+surface for a slide deck the instructor builds themselves is nil.
+Wait for Slidev upstream to publish a clean update.
 
-Known high-severity packages flagged: `defu`, `lodash-es`, `picomatch`,
-`rollup`, `vite`. Moderate: `dompurify`, `yaml`, `unhead`, and the
-`@mermaid-js/parser` / `chevrotain` chain.
-
-### `exercises/javascript/my-task-manager` — 4 findings
-
-Jest + Express dev dependencies. Students don't touch these directly, and
-the lockfile gets regenerated when they run `npm install` anyway.
-
-**Fix:**
+### Re-running the audit next time
 
 ```bash
+# Root (Slidev toolchain - only affects the laptop building the deck)
+npm audit fix --ignore-scripts   # --ignore-scripts avoids a Playwright
+                                  # post-install that tries to fetch
+                                  # Chromium (can fail behind proxies)
+
+# Exercise lockfile
 cd exercises/javascript/my-task-manager
-npm audit fix
+npm audit fix --ignore-scripts
 ```
-
-Known: `minimatch`, `path-to-regexp`, `picomatch` (high);
-`brace-expansion` (moderate).
 
 ### Python / Java exercises
 
