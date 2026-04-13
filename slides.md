@@ -106,7 +106,7 @@ Kousen IT, Inc.
 - **Gemini 3.1 Pro Preview** available via `/model` (0.31)
 - **Workspace model steering** + parallel extension loading (0.32)
 - **A2A remote agents** over authenticated HTTP (0.33)
-- **Plan Mode is default-on**; gVisor/LXC sandboxing on Linux (0.34)
+- **Plan Mode** (opt-in via `--approval-mode plan`); gVisor/LXC sandboxing on Linux (0.34)
 - **Multi-registry MCP/extensions**, macOS Seatbelt, Windows sandboxing, Git worktrees (0.36)
 - **Ctrl+G** replaces `Ctrl+X` for external editor; persistent policy approvals (0.37)
 - **Latest stable track**: Gemini CLI `0.37.x`
@@ -449,19 +449,19 @@ backgroundSize: cover
 
 <v-clicks>
 
-- **plan** *(default since 0.34)*: Draft a plan, no execution until approved
-- **default**: Prompt for approval on each tool call
+- **default** *(the default)*: Prompt for approval on each tool call
+- **plan**: Read-only — draft a plan, no execution until you approve
 - **auto_edit**: Auto-approve file edit tools only
 - **yolo**: Auto-approve ALL tool calls
 
 </v-clicks>
 
 ```bash
-# New default - builds a plan first
+# Default - interactive, prompts per tool call
 gemini
 
-# Jump straight to per-tool prompts
-gemini --approval-mode default
+# Draft a plan first (read-only until approved)
+gemini --approval-mode plan
 
 # Auto-approve edits only
 gemini --approval-mode auto_edit
@@ -477,18 +477,18 @@ gemini --approval-mode yolo
 
 <v-clicks>
 
-- **Default since Gemini CLI 0.34** — expect it when you launch
+- **Opt-in with `--approval-mode plan`** — read-only until you approve
 - Drafts a structured plan before touching any file or tool
 - Open the plan in your external editor with `Ctrl+G`
-- Use `Shift+Tab` to cycle out of plan mode into `default` / `auto_edit`
+- Use `Shift+Tab` to cycle into `default` / `auto_edit` once you're ready
 - 0.33+ adds research subagents, annotations, and a `copy` subcommand
-- Heads-up: any lesson that used to run immediately now **pauses first**
+- Great first step when exploring an unfamiliar codebase
 
 </v-clicks>
 
 ```bash
-# Launch straight into an execution mode instead
-gemini --approval-mode default
+# Launch in plan mode
+gemini --approval-mode plan
 ```
 
 ---

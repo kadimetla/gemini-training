@@ -1,50 +1,7 @@
-# Maintenance Notes (instructor-only)
+# Dependency triage notes (instructor-only)
 
-Private notes for keeping the course deliverable. Not intended for students.
-
-## Pre-class smoke test
-
-Run through this the day before teaching to catch anything that drifted
-since the last delivery:
-
-```bash
-# 1. Confirm you're on a current Gemini CLI
-npm install -g @google/gemini-cli
-gemini --version                   # expect 0.37.x or later
-
-# 2. Launch and verify Plan Mode is the default (since 0.34)
-gemini
-#   -> should draft a plan before executing anything
-#   -> Shift+Tab cycles out of plan mode; Ctrl+G opens external editor
-
-# 3. Verify the current model list includes Gemini 3.1 Pro Preview
-/model
-
-# 4. Smoke-test one custom command to confirm the TOML format still loads
-#    (e.g. /review, /test-gen, /docs, /refactor in commands/)
-
-# 5. Confirm the Policy Engine flag is present and inspect current rule schema
-gemini --policy --help
-
-# 6. Regenerate the slides PDF so the handout matches the source
-#    IMPORTANT: slides.pdf on main is NOT auto-rebuilt - if slides.md
-#    has changed since the last PDF commit, the committed PDF is stale
-#    and students will get out-of-date handouts.
-npx slidev export slides.md        # traditional headless export
-# ...or use the new in-browser exporter (Slidev 52.x):
-# npx slidev                        # then visit http://localhost:<port>/export
-git add slides.pdf
-git commit -m "docs: regenerate slides.pdf"
-git push origin main
-```
-
-If any step surfaces a surprise, check the release notes at
-<https://geminicli.com/docs/changelogs/latest/> before class.
-
-> **Heads-up for April 2026 delivery:** `slides.md` was refreshed for
-> Gemini CLI 0.30–0.37 (commit `b60409b`), but `slides.pdf` has NOT
-> been regenerated from a sandboxed environment. Rebuild it from your
-> laptop and commit the result before class.
+Private notes on dependency decisions for this repo. Not intended for
+students. Kept so the next refresh doesn't re-litigate the same calls.
 
 ## Dependency vulnerabilities
 
